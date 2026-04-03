@@ -1,5 +1,5 @@
 # ═══════════════════════════════════════════════════════════════════════════════
-#  📐 Regression Lab — OLS · Ridge · LASSO  (interactive Streamlit demo)
+#  📐 Regression Lab — OLS · Ridge · LASSO
 # ═══════════════════════════════════════════════════════════════════════════════
 
 import streamlit as st
@@ -9,7 +9,7 @@ import plotly.graph_objects as go
 from sklearn.linear_model import LinearRegression, Ridge, Lasso
 from sklearn.preprocessing import StandardScaler
 
-# ── Config ───────────────────────────────────────────────────────────────────
+# ── Page config ──────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="Regression Lab",
     page_icon="📐",
@@ -17,100 +17,212 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# ── CSS ──────────────────────────────────────────────────────────────────────
+# ── CSS — white theme ─────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@600;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-html, body, [class*="css"] { font-family: 'Space Mono', monospace; }
-.stApp { background: #0a0c10; color: #e8eaf0; }
+html, body, [class*="css"] {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
 
-/* sidebar */
+/* App background */
+.stApp { background: #ffffff; color: #1a1a2e; }
+
+/* Sidebar */
 section[data-testid="stSidebar"] {
-    background: #0d0f14 !important;
-    border-right: 1px solid #232835 !important;
+    background: #f8f9fc !important;
+    border-right: 1px solid #e2e8f0 !important;
 }
-section[data-testid="stSidebar"] * { color: #8892a4 !important; }
-section[data-testid="stSidebar"] .stSelectbox label,
-section[data-testid="stSidebar"] .stSlider label,
-section[data-testid="stSidebar"] .stCheckbox label { color: #8892a4 !important; font-size: 12px !important; }
+section[data-testid="stSidebar"] * { color: #374151 !important; }
+section[data-testid="stSidebar"] label {
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.3px !important;
+}
 
-/* metric cards */
+/* Metric cards */
 .metric-card {
-    background: #111318; border: 1px solid #232835;
-    padding: 14px 16px; border-radius: 0; margin-bottom: 0;
+    background: #f8f9fc;
+    border: 1px solid #e2e8f0;
+    border-top: 3px solid;
+    padding: 14px 16px;
+    border-radius: 6px;
 }
-.metric-label { font-size: 10px; letter-spacing: 2px; color: #5a6070; text-transform: uppercase; }
-.metric-value { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 22px; margin-top: 4px; }
-.metric-row { display: flex; gap: 8px; margin-bottom: 16px; }
-.metric-row .metric-card { flex: 1; }
+.metric-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    color: #94a3b8;
+    text-transform: uppercase;
+}
+.metric-value {
+    font-weight: 700;
+    font-size: 24px;
+    margin-top: 6px;
+    letter-spacing: -0.5px;
+}
 
-/* section header */
+/* Section headers */
 .section-hdr {
-    font-size: 10px; letter-spacing: 2px; color: #3a4050;
-    text-transform: uppercase; border-bottom: 1px solid #1a1f2a;
-    padding-bottom: 6px; margin-bottom: 14px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: #94a3b8;
+    text-transform: uppercase;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+    margin-top: 4px;
 }
-/* model badge */
-.model-badge {
-    display: inline-block; padding: 3px 10px;
-    font-size: 11px; font-weight: 700; letter-spacing: 1px;
-    margin-bottom: 8px;
-}
-/* coef bar */
-.coef-item { margin-bottom: 10px; }
-.coef-header { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 11px; }
-.coef-name { color: #8892a4; }
-.coef-val  { font-weight: 700; }
-.coef-track { height: 4px; background: #1a1f2a; border-radius: 0; }
-.coef-fill-pos { height: 4px; background: #00e5ff; border-radius: 0; }
-.coef-fill-neg { height: 4px; background: #ff6b6b; border-radius: 0; }
-.coef-zero     { color: #5a6070 !important; font-style: italic; font-size: 10px; }
 
-/* info box */
+/* Info box */
 .info-box {
-    background: #111318; border: 1px solid #232835; border-left: 3px solid;
-    padding: 14px 16px; font-size: 12px; line-height: 1.8; margin-bottom: 16px;
+    background: #f8f9fc;
+    border: 1px solid #e2e8f0;
+    border-left: 4px solid;
+    padding: 14px 18px;
+    font-size: 13px;
+    line-height: 1.75;
+    margin-bottom: 18px;
+    border-radius: 0 6px 6px 0;
+    color: #374151;
 }
 
-/* page title */
+/* Page title */
 .page-title {
-    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 28px;
-    letter-spacing: -1px; margin-bottom: 2px;
+    font-weight: 800;
+    font-size: 30px;
+    letter-spacing: -1px;
+    margin-bottom: 2px;
+    color: #0f172a;
 }
-.page-sub { color: #3a4050; font-size: 12px; letter-spacing: 1px; margin-bottom: 24px; }
+.page-sub {
+    color: #94a3b8;
+    font-size: 13px;
+    font-weight: 400;
+    margin-bottom: 24px;
+}
+
+/* Coef bars */
+.coef-item { margin-bottom: 12px; }
+.coef-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    font-size: 12px;
+    font-weight: 500;
+}
+.coef-name { color: #64748b; }
+.coef-val  { font-weight: 700; font-size: 12px; }
+.coef-track {
+    height: 5px;
+    background: #e2e8f0;
+    border-radius: 3px;
+    overflow: hidden;
+}
+.coef-fill { height: 5px; border-radius: 3px; }
+.coef-zero { color: #94a3b8 !important; font-style: italic; font-size: 11px; }
+
+/* OLS info panel */
+.ols-info {
+    background: #f8f9fc;
+    border: 1px solid #e2e8f0;
+    padding: 18px;
+    font-size: 13px;
+    line-height: 1.8;
+    color: #64748b;
+    border-radius: 6px;
+}
 </style>
 """, unsafe_allow_html=True)
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  PALETTE  (works on white)
+# ═══════════════════════════════════════════════════════════════════════════════
+MODEL_COLORS = {
+    "OLS":   "#16a34a",   # green-600
+    "Ridge": "#2563eb",   # blue-600
+    "LASSO": "#dc2626",   # red-600
+}
+MODEL_BG = {
+    "OLS":   "#f0fdf4",
+    "Ridge": "#eff6ff",
+    "LASSO": "#fef2f2",
+}
+MODEL_BORDER = {
+    "OLS":   "#86efac",
+    "Ridge": "#93c5fd",
+    "LASSO": "#fca5a5",
+}
+
+# Reg-path palette — distinct, readable on white
+PATH_PALETTE = ["#2563eb", "#dc2626", "#16a34a", "#d97706",
+                "#7c3aed", "#db2777", "#0891b2", "#ea580c"]
+
+# ── Shared Plotly layout (white theme) ────────────────────────────────────────
+FONT_AXIS = dict(family="Inter, sans-serif", size=12, color="#374151")
+FONT_TICK = dict(family="Inter, sans-serif", size=11, color="#6b7280")
+
+def base_layout(height: int = 300, **extra) -> dict:
+    return dict(
+        plot_bgcolor="#ffffff",
+        paper_bgcolor="rgba(0,0,0,0)",
+        font=dict(family="Inter, sans-serif", size=12, color="#374151"),
+        margin=dict(t=16, b=52, l=60, r=24),
+        height=height,
+        legend=dict(
+            bgcolor="rgba(255,255,255,0.9)",
+            bordercolor="#e2e8f0",
+            borderwidth=1,
+            font=dict(family="Inter, sans-serif", size=12, color="#374151"),
+        ),
+        xaxis=dict(
+            gridcolor="#f1f5f9",
+            linecolor="#e2e8f0",
+            zerolinecolor="#e2e8f0",
+            tickfont=FONT_TICK,
+            title_font=FONT_AXIS,
+        ),
+        yaxis=dict(
+            gridcolor="#f1f5f9",
+            linecolor="#e2e8f0",
+            zerolinecolor="#e2e8f0",
+            tickfont=FONT_TICK,
+            title_font=FONT_AXIS,
+        ),
+        **extra,
+    )
 
 # ═══════════════════════════════════════════════════════════════════════════════
 #  DATASETS
 # ═══════════════════════════════════════════════════════════════════════════════
 DATASETS = {
     "🏠 House Prices": {
-        "features": ["Size (sqft)", "Bedrooms", "Age (yrs)", "Location Score"],
+        "features":   ["Size (sqft)", "Bedrooms", "Age (yrs)", "Location Score"],
         "true_coefs": [150.0, 8000.0, -500.0, 12000.0],
-        "intercept": 50000.0,
+        "intercept":  50000.0,
         "noise_scale": 15000.0,
         "desc": "Predict house price from structural and location features.",
     },
     "📚 Exam Scores": {
-        "features": ["Study Hours", "Sleep (hrs)", "Attendance %", "Prior Score"],
+        "features":   ["Study Hours", "Sleep (hrs)", "Attendance %", "Prior Score"],
         "true_coefs": [4.5, 2.1, 0.3, 0.4],
-        "intercept": 20.0,
+        "intercept":  20.0,
         "noise_scale": 8.0,
         "desc": "Predict final exam score from student habits and history.",
     },
     "💉 Blood Pressure": {
-        "features": ["Age", "Weight (kg)", "Sodium (mg)", "Exercise (hr/wk)"],
+        "features":   ["Age", "Weight (kg)", "Sodium (mg)", "Exercise (hr/wk)"],
         "true_coefs": [0.5, 0.3, 0.008, -1.2],
-        "intercept": 80.0,
+        "intercept":  80.0,
         "noise_scale": 6.0,
         "desc": "Predict systolic blood pressure from patient lifestyle metrics.",
     },
     "📈 Stock Returns": {
-        "features": ["P/E Ratio", "Volume (M)", "Volatility", "Momentum"],
+        "features":   ["P/E Ratio", "Volume (M)", "Volatility", "Momentum"],
         "true_coefs": [-0.15, 0.002, -0.8, 1.2],
-        "intercept": 5.0,
+        "intercept":  5.0,
         "noise_scale": 3.0,
         "desc": "Predict monthly stock returns from fundamental and technical factors.",
     },
@@ -119,42 +231,28 @@ DATASETS = {
 # ═══════════════════════════════════════════════════════════════════════════════
 #  DATA GENERATION
 # ═══════════════════════════════════════════════════════════════════════════════
-def generate_data(dataset_name: str, n: int, noise: float, seed: int = 42) -> tuple:
-    rng = np.random.RandomState(seed)
-    ds  = DATASETS[dataset_name]
-    p   = len(ds["features"])
-
-    # Generate correlated features (more realistic)
-    base = rng.randn(n, p)
-    corr = 0.25
-    X_raw = base + corr * rng.randn(n, p)
-
-    # Scale each feature to a reasonable range
-    scales = [500, 3, 30, 10]  # rough feature-specific scales
+def generate_data(dataset_name: str, n: int, noise: float, seed: int = 42):
+    rng    = np.random.RandomState(seed)
+    ds     = DATASETS[dataset_name]
+    p      = len(ds["features"])
+    base   = rng.randn(n, p)
+    X_raw  = base + 0.25 * rng.randn(n, p)
+    scales = [500, 3, 30, 10]
     while len(scales) < p:
         scales.append(10)
-
     X = np.zeros((n, p))
     for j in range(p):
         X[:, j] = X_raw[:, j] * scales[j % len(scales)]
-
     coefs = np.array(ds["true_coefs"])
     y = X @ coefs + ds["intercept"] + noise * ds["noise_scale"] * rng.randn(n)
-
     return X, y
 
 # ═══════════════════════════════════════════════════════════════════════════════
 #  FITTING
 # ═══════════════════════════════════════════════════════════════════════════════
-MODEL_COLORS = {
-    "OLS":   "#a8ff78",
-    "Ridge": "#00e5ff",
-    "LASSO": "#ff6b6b",
-}
-
 def fit_model(X, y, model_name: str, alpha: float,
               normalize: bool, fit_intercept: bool):
-    X_fit = X.copy()
+    X_fit  = X.copy()
     scaler = None
     if normalize:
         scaler = StandardScaler()
@@ -164,407 +262,435 @@ def fit_model(X, y, model_name: str, alpha: float,
         model = LinearRegression(fit_intercept=fit_intercept)
     elif model_name == "Ridge":
         model = Ridge(alpha=alpha, fit_intercept=fit_intercept, max_iter=10000)
-    else:  # LASSO
+    else:
         model = Lasso(alpha=alpha, fit_intercept=fit_intercept,
                       max_iter=50000, tol=1e-4)
 
     model.fit(X_fit, y)
     y_hat = model.predict(X_fit)
 
-    # Recover original-scale coefficients when normalised
-    if normalize and scaler is not None:
-        coefs_orig = model.coef_ / scaler.scale_
-    else:
-        coefs_orig = model.coef_
+    coefs_orig = model.coef_ / scaler.scale_ if (normalize and scaler) else model.coef_
+    return model, scaler, coefs_orig, y_hat
 
-    return model, coefs_orig, y_hat
 
-def metrics(y, y_hat):
+def calc_metrics(y, y_hat):
     ss_res = np.sum((y - y_hat) ** 2)
     ss_tot = np.sum((y - np.mean(y)) ** 2)
-    r2     = 1 - ss_res / ss_tot if ss_tot > 0 else 0.0
-    mse    = ss_res / len(y)
-    coef_norm = float(np.sum(coefs ** 2)) if (coefs := y_hat) is not None else 0.0
+    r2  = float(1 - ss_res / ss_tot) if ss_tot > 0 else 0.0
+    mse = float(ss_res / len(y))
     return r2, mse
 
 # ═══════════════════════════════════════════════════════════════════════════════
 #  CHARTS
 # ═══════════════════════════════════════════════════════════════════════════════
-PLOT_LAYOUT = dict(
-    plot_bgcolor="#111318",
-    paper_bgcolor="rgba(0,0,0,0)",
-    font=dict(family="Space Mono", color="#5a6070", size=10),
-    margin=dict(t=10, b=40, l=50, r=20),
-    legend=dict(bgcolor="rgba(0,0,0,0)", font=dict(size=10)),
-    xaxis=dict(gridcolor="#1a1f2a", linecolor="#232835", zerolinecolor="#232835"),
-    yaxis=dict(gridcolor="#1a1f2a", linecolor="#232835", zerolinecolor="#232835"),
-)
 
+def scatter_chart(X, y, model, scaler, feature_name: str,
+                  model_name: str, normalize: bool) -> go.Figure:
+    """
+    Plot observed points + a smooth fitted line.
 
-def scatter_chart(X, y, y_hat, feature_name: str, model_name: str):
-    x_vals = X[:, 0]
+    The line is built by sweeping feature₁ across its observed range in 200
+    steps while holding all other features fixed at their column means.
+    This gives a clean straight line for linear models.
+    """
     color  = MODEL_COLORS[model_name]
+    x_obs  = X[:, 0]
 
-    order  = np.argsort(x_vals)
+    # Build smooth grid over feature 1, others held at mean
+    x_grid = np.linspace(x_obs.min(), x_obs.max(), 200)
+    X_grid = np.tile(X.mean(axis=0), (200, 1))
+    X_grid[:, 0] = x_grid
+
+    X_grid_fit = scaler.transform(X_grid) if (normalize and scaler) else X_grid
+    y_grid = model.predict(X_grid_fit)
+
     fig = go.Figure()
+
+    # Observed scatter
     fig.add_trace(go.Scatter(
-        x=x_vals, y=y, mode="markers", name="Actual",
-        marker=dict(color="rgba(0,229,255,0.35)", size=5,
-                    line=dict(color="rgba(0,229,255,0.7)", width=0.7)),
+        x=x_obs, y=y,
+        mode="markers",
+        name="Observed",
+        marker=dict(
+            color="rgba(30,30,30,0.12)",
+            size=6,
+            line=dict(color="rgba(30,30,30,0.35)", width=1),
+        ),
     ))
+
+    # Smooth fitted line
     fig.add_trace(go.Scatter(
-        x=x_vals[order], y=y_hat[order], mode="lines", name=f"{model_name} fit",
-        line=dict(color=color, width=2),
+        x=x_grid, y=y_grid,
+        mode="lines",
+        name=f"{model_name} fit",
+        line=dict(color=color, width=2.5),
     ))
+
     fig.update_layout(
-        **PLOT_LAYOUT,
-        height=300,
-        xaxis_title=feature_name,
-        yaxis_title="Target",
+        **base_layout(height=320,
+                      xaxis_title=feature_name,
+                      yaxis_title="Target"),
     )
     return fig
 
 
-def coef_chart(coefs, feature_names: list, model_name: str):
+def coef_chart(coefs, feature_names: list, model_name: str) -> go.Figure:
     color  = MODEL_COLORS[model_name]
-    colors = [color if c >= 0 else "#ff6b6b" for c in coefs]
+    colors = [color if c >= 0 else "#dc2626" for c in coefs]
+
     fig = go.Figure(go.Bar(
-        x=feature_names, y=coefs,
+        x=feature_names,
+        y=coefs,
         marker_color=colors,
         marker_line_width=0,
+        text=[f"{v:.3f}" for v in coefs],
+        textposition="outside",
+        textfont=dict(family="Inter, sans-serif", size=11, color="#374151"),
     ))
-    fig.add_hline(y=0, line_color="#3a4050", line_width=1)
+    fig.add_hline(y=0, line_color="#cbd5e1", line_width=1.5)
     fig.update_layout(
-        **PLOT_LAYOUT,
-        height=220,
-        yaxis_title="Coefficient",
-        showlegend=False,
+        **base_layout(height=240,
+                      yaxis_title="Coefficient value",
+                      showlegend=False),
     )
+    fig.update_yaxes(range=[
+        min(min(coefs) * 1.3, -0.1),
+        max(max(coefs) * 1.3,  0.1),
+    ])
     return fig
 
 
 def reg_path_chart(X, y, feature_names: list, model_name: str,
                    normalize: bool, fit_intercept: bool,
-                   current_alpha: float):
-    """Sweep alpha and plot how coefficients change."""
+                   current_alpha: float) -> go.Figure | None:
     if model_name == "OLS":
         return None
 
-    # Log-spaced alphas for a better view
-    alphas = np.logspace(-3, 3, 80)
+    alphas = np.logspace(-3, 4, 100)
     paths  = {f: [] for f in feature_names}
 
-    X_fit = X.copy()
+    X_fit  = X.copy()
     scaler = None
     if normalize:
         scaler = StandardScaler()
         X_fit  = scaler.fit_transform(X_fit)
 
     for a in alphas:
-        if model_name == "Ridge":
-            m = Ridge(alpha=a, fit_intercept=fit_intercept, max_iter=10000)
-        else:
-            m = Lasso(alpha=a, fit_intercept=fit_intercept,
-                      max_iter=50000, tol=1e-4)
+        m = (Ridge(alpha=a, fit_intercept=fit_intercept, max_iter=10000)
+             if model_name == "Ridge"
+             else Lasso(alpha=a, fit_intercept=fit_intercept, max_iter=50000, tol=1e-4))
         m.fit(X_fit, y)
-        c = m.coef_
-        if normalize and scaler is not None:
-            c = c / scaler.scale_
+        c = m.coef_ / scaler.scale_ if (normalize and scaler) else m.coef_
         for j, f in enumerate(feature_names):
             paths[f].append(float(c[j]))
 
-    palette = ["#00e5ff", "#ff6b6b", "#a8ff78", "#ffbe5c",
-               "#c084fc", "#f472b6", "#34d399", "#fb923c"]
     fig = go.Figure()
     for j, fname in enumerate(feature_names):
         fig.add_trace(go.Scatter(
-            x=np.log10(alphas), y=paths[fname],
-            mode="lines", name=fname,
-            line=dict(color=palette[j % len(palette)], width=1.5),
-            opacity=0.85,
+            x=np.log10(alphas),
+            y=paths[fname],
+            mode="lines",
+            name=fname,
+            line=dict(color=PATH_PALETTE[j % len(PATH_PALETTE)], width=2),
         ))
 
-    # Vertical line at current alpha
+    # Current alpha marker
     if current_alpha > 0:
         log_cur = np.log10(current_alpha)
-        fig.add_vline(x=log_cur, line_color="rgba(255,255,255,0.35)",
-                      line_width=1, line_dash="dash",
-                      annotation_text=f"  α={current_alpha:.3g}",
-                      annotation_font=dict(color="rgba(255,255,255,0.5)", size=10))
+        fig.add_vline(
+            x=log_cur,
+            line_color="#64748b", line_width=1.5, line_dash="dash",
+            annotation_text=f"α = {current_alpha:.3g}",
+            annotation_font=dict(family="Inter, sans-serif",
+                                 color="#374151", size=12),
+            annotation_position="top right",
+        )
 
-    fig.add_hline(y=0, line_color="#3a4050", line_width=1, line_dash="dot")
+    fig.add_hline(y=0, line_color="#cbd5e1", line_width=1, line_dash="dot")
     fig.update_layout(
-        **PLOT_LAYOUT,
-        height=220,
-        xaxis_title="log₁₀(α)",
-        yaxis_title="Coefficient value",
+        **base_layout(height=260,
+                      xaxis_title="log₁₀(α)",
+                      yaxis_title="Coefficient value"),
     )
     return fig
 
 
-def residual_chart(y, y_hat, model_name: str):
+def residual_chart(y, y_hat, model_name: str) -> go.Figure:
+    color     = MODEL_COLORS[model_name]
     residuals = y - y_hat
-    color = MODEL_COLORS[model_name]
+
     fig = go.Figure()
     fig.add_trace(go.Scatter(
-        x=y_hat, y=residuals, mode="markers",
+        x=y_hat, y=residuals,
+        mode="markers",
         name="Residual",
-        marker=dict(color=color, size=4, opacity=0.6),
+        marker=dict(color=color, size=5, opacity=0.55,
+                    line=dict(color=color, width=0.5)),
     ))
-    fig.add_hline(y=0, line_color="#3a4050", line_width=1, line_dash="dot")
+    fig.add_hline(y=0, line_color="#94a3b8", line_width=1.5, line_dash="dot")
     fig.update_layout(
-        **PLOT_LAYOUT,
-        height=220,
-        xaxis_title="Fitted value",
-        yaxis_title="Residual",
-        showlegend=False,
+        **base_layout(height=260,
+                      xaxis_title="Fitted value",
+                      yaxis_title="Residual",
+                      showlegend=False),
     )
     return fig
-
 
 # ═══════════════════════════════════════════════════════════════════════════════
 #  SIDEBAR
 # ═══════════════════════════════════════════════════════════════════════════════
 with st.sidebar:
-    st.markdown("### 📐 Regression Lab")
+    st.markdown("## 📐 Regression Lab")
     st.markdown("---")
 
-    st.markdown('<div class="section-hdr">DATASET</div>', unsafe_allow_html=True)
-    dataset_name = st.selectbox("", list(DATASETS.keys()), label_visibility="collapsed")
+    st.markdown("**Dataset**")
+    dataset_name = st.selectbox("Dataset", list(DATASETS.keys()),
+                                label_visibility="collapsed")
 
-    st.markdown('<div class="section-hdr" style="margin-top:20px;">MODEL</div>', unsafe_allow_html=True)
-    model_name = st.selectbox("", ["OLS", "Ridge", "LASSO"], label_visibility="collapsed")
+    st.markdown("**Model**")
+    model_name = st.selectbox("Model", ["OLS", "Ridge", "LASSO"],
+                              label_visibility="collapsed")
 
     alpha = 1.0
     if model_name != "OLS":
-        st.markdown(f'<div class="section-hdr" style="margin-top:20px;">REGULARIZATION (α)</div>',
-                    unsafe_allow_html=True)
-        alpha = st.slider("Alpha", min_value=0.001, max_value=10000.0,
-                          value=1.0, step=0.001,
+        st.markdown(f"**Regularization strength (α)**")
+        alpha = st.slider("alpha", 0.001, 10000.0, 1.0, 0.001,
                           format="%.3f", label_visibility="collapsed")
         st.caption(f"α = {alpha:.3g}")
 
-        # Per-dataset guidance for LASSO sparsity
         if model_name == "LASSO":
-            sparsity_tips = {
-                "🏠 House Prices":    "Try α > 2000 for sparsity (large y-scale)",
-                "📚 Exam Scores":     "Try α ≈ 1–5 to see zeros appear",
-                "💉 Blood Pressure":  "Try α ≈ 0.5–3 for sparsity",
-                "📈 Stock Returns":   "Try α ≈ 0.1–1 for sparsity",
+            tips = {
+                "🏠 House Prices":   "Try α > 2 000 to see zeros",
+                "📚 Exam Scores":    "Try α ≈ 1–5 to see zeros",
+                "💉 Blood Pressure": "Try α ≈ 0.5–3 to see zeros",
+                "📈 Stock Returns":  "Try α ≈ 0.1–1 to see zeros",
             }
-            tip = sparsity_tips.get(dataset_name, "Increase α to drive coefs to zero")
-            st.caption(f"💡 {tip}")
+            st.caption(f"💡 {tips.get(dataset_name, 'Increase α to zero coefs')}")
 
-    st.markdown('<div class="section-hdr" style="margin-top:20px;">DATA</div>', unsafe_allow_html=True)
-    n_samples = st.slider("Sample size",      50, 500, 150, step=10)
-    noise_lvl = st.slider("Noise level",       0.0, 3.0, 1.0, step=0.1)
+    st.markdown("**Data settings**")
+    n_samples = st.slider("Sample size",  50, 500, 150, 10)
+    noise_lvl = st.slider("Noise level", 0.0, 3.0, 1.0, 0.1)
 
-    st.markdown('<div class="section-hdr" style="margin-top:20px;">OPTIONS</div>', unsafe_allow_html=True)
+    st.markdown("**Options**")
     normalize     = st.checkbox("Standardize features", value=True)
     fit_intercept = st.checkbox("Fit intercept",         value=True)
 
     st.markdown("---")
     st.markdown("""
-<div style="font-size:10px; color:#3a4050; line-height:1.7;">
-<b style="color:#5a6070;">OLS</b> — minimises RSS, no penalty<br>
-<b style="color:#5a6070;">Ridge</b> — L2 penalty, shrinks all coefs<br>
-<b style="color:#5a6070;">LASSO</b> — L1 penalty, sparse solution<br><br>
+**OLS** — no penalty, minimises RSS  
+**Ridge** — L2 penalty, shrinks all β  
+**LASSO** — L1 penalty, sparsifies β  
+
 Larger α → stronger regularization
-</div>
-""", unsafe_allow_html=True)
+""")
 
 # ═══════════════════════════════════════════════════════════════════════════════
-#  MAIN — data + fit
+#  FIT
 # ═══════════════════════════════════════════════════════════════════════════════
-ds     = DATASETS[dataset_name]
-color  = MODEL_COLORS[model_name]
+ds    = DATASETS[dataset_name]
+color = MODEL_COLORS[model_name]
+bg    = MODEL_BG[model_name]
+bdr   = MODEL_BORDER[model_name]
 
 X, y = generate_data(dataset_name, n_samples, noise_lvl)
-model, coefs, y_hat = fit_model(X, y, model_name, alpha, normalize, fit_intercept)
-r2, mse = metrics(y, y_hat)
-coef_norm = float(np.sum(coefs ** 2))
-intercept_val = float(model.intercept_) if fit_intercept else None
-n_zero = int(np.sum(np.abs(coefs) < 1e-6))
+model, scaler, coefs, y_hat = fit_model(X, y, model_name, alpha,
+                                        normalize, fit_intercept)
+r2, mse     = calc_metrics(y, y_hat)
+coef_norm   = float(np.sum(coefs ** 2))
+intercept_v = float(model.intercept_) if fit_intercept else None
+n_zero      = int(np.sum(np.abs(coefs) < 1e-6))
 
 # ═══════════════════════════════════════════════════════════════════════════════
-#  LAYOUT
+#  PAGE HEADER
 # ═══════════════════════════════════════════════════════════════════════════════
 st.markdown(
-    f'<div class="page-title">Regression <span style="color:{color}">Lab</span></div>'
-    f'<div class="page-sub">{dataset_name} &nbsp;·&nbsp; {model_name} &nbsp;·&nbsp; '
-    f'n={n_samples} &nbsp;·&nbsp; noise={noise_lvl:.1f}</div>',
+    f'<div class="page-title">Regression '
+    f'<span style="color:{color};">Lab</span></div>'
+    f'<div class="page-sub">'
+    f'{dataset_name} &nbsp;·&nbsp; '
+    f'<b style="color:{color};">{model_name}</b>'
+    f'{f" &nbsp;·&nbsp; α = {alpha:.3g}" if model_name != "OLS" else ""}'
+    f' &nbsp;·&nbsp; n = {n_samples} &nbsp;·&nbsp; noise = {noise_lvl:.1f}'
+    f'</div>',
     unsafe_allow_html=True,
 )
 
-# ── Metrics row ───────────────────────────────────────────────────────────────
+# ── Metric cards ──────────────────────────────────────────────────────────────
 c1, c2, c3, c4 = st.columns(4)
 
-def metric_html(label, value, color="#a8ff78"):
-    return f"""<div class="metric-card">
-        <div class="metric-label">{label}</div>
-        <div class="metric-value" style="color:{color};">{value}</div>
-    </div>"""
+def metric_card(label, value, accent_color, border_color):
+    return (
+        f'<div class="metric-card" '
+        f'style="border-top-color:{accent_color}; background:{bg};">'
+        f'<div class="metric-label">{label}</div>'
+        f'<div class="metric-value" style="color:{accent_color};">{value}</div>'
+        f'</div>'
+    )
 
 with c1:
-    st.markdown(metric_html("R²", f"{r2:.4f}", color), unsafe_allow_html=True)
+    st.markdown(metric_card("R²", f"{r2:.4f}", color, bdr), unsafe_allow_html=True)
 with c2:
-    st.markdown(metric_html("MSE", f"{mse:.2f}" if mse < 1e6 else f"{mse:.2e}", color), unsafe_allow_html=True)
+    mse_str = f"{mse:.2f}" if mse < 1e6 else f"{mse:.2e}"
+    st.markdown(metric_card("MSE", mse_str, color, bdr), unsafe_allow_html=True)
 with c3:
-    st.markdown(metric_html("‖β‖²", f"{coef_norm:.4f}", color), unsafe_allow_html=True)
+    st.markdown(metric_card("‖β‖²", f"{coef_norm:.4f}", color, bdr), unsafe_allow_html=True)
 with c4:
     if model_name == "LASSO":
-        st.markdown(metric_html("Zero coefs", f"{n_zero} / {len(coefs)}", "#ffbe5c"),
-                    unsafe_allow_html=True)
+        st.markdown(metric_card("Zero coefs", f"{n_zero} / {len(coefs)}",
+                                "#d97706", "#fde68a"), unsafe_allow_html=True)
     else:
-        iv = f"{intercept_val:.2f}" if intercept_val is not None else "—"
-        st.markdown(metric_html("Intercept", iv, color), unsafe_allow_html=True)
+        iv = f"{intercept_v:.2f}" if intercept_v is not None else "—"
+        st.markdown(metric_card("Intercept", iv, color, bdr), unsafe_allow_html=True)
 
-st.markdown("<div style='height:16px;'></div>", unsafe_allow_html=True)
+st.markdown("<div style='height:18px;'></div>", unsafe_allow_html=True)
 
-# ── Model info box ────────────────────────────────────────────────────────────
+# ── Model info ────────────────────────────────────────────────────────────────
 MODEL_INFO = {
     "OLS": (
-        "#a8ff78",
         "Ordinary Least Squares minimises the residual sum of squares (RSS) with no "
         "constraint on coefficient magnitudes. It is the BLUE estimator (Gauss-Markov) "
-        "when assumptions hold, but can overfit with correlated or many features.",
+        "when assumptions hold, but can overfit with many correlated features."
     ),
     "Ridge": (
-        "#00e5ff",
         "Ridge adds an L2 penalty λ‖β‖² to the RSS objective. All coefficients are "
         "shrunk toward zero proportionally — none reach exactly zero. It handles "
-        "multicollinearity well and has a closed-form solution.",
+        "multicollinearity well and has a closed-form analytical solution."
     ),
     "LASSO": (
-        "#ff6b6b",
         "LASSO adds an L1 penalty λ‖β‖₁. The L1 geometry drives some coefficients "
         "to exactly zero, performing automatic feature selection. Large α produces "
-        "sparse models. No closed-form; solved via coordinate descent.",
+        "sparse models. No closed-form — solved via coordinate descent."
     ),
 }
-info_color, info_text = MODEL_INFO[model_name]
-alpha_note = f" &nbsp;·&nbsp; α = {alpha:.3g}" if model_name != "OLS" else ""
 st.markdown(
-    f'<div class="info-box" style="border-color:{info_color};">'
-    f'<b style="color:{info_color};">{model_name}{alpha_note}</b><br>'
-    f'{info_text}</div>',
+    f'<div class="info-box" style="border-left-color:{color}; background:{bg};">'
+    f'<strong style="color:{color};">{model_name}</strong>'
+    f'{"  ·  α = " + f"{alpha:.3g}" if model_name != "OLS" else ""}'
+    f'<br>{MODEL_INFO[model_name]}</div>',
     unsafe_allow_html=True,
 )
 
-# ── Main charts row ───────────────────────────────────────────────────────────
+# ═══════════════════════════════════════════════════════════════════════════════
+#  MAIN CHARTS ROW
+# ═══════════════════════════════════════════════════════════════════════════════
 col_left, col_right = st.columns([3, 2])
 
 with col_left:
-    st.markdown('<div class="section-hdr">SCATTER — feature₁ vs target</div>',
+    st.markdown('<div class="section-hdr">Scatter — observed vs fitted line</div>',
                 unsafe_allow_html=True)
     st.plotly_chart(
-        scatter_chart(X, y, y_hat, ds["features"][0], model_name),
-        use_container_width=True, config={"displayModeBar": False},
+        scatter_chart(X, y, model, scaler, ds["features"][0],
+                      model_name, normalize),
+        use_container_width=True,
+        config={"displayModeBar": False},
     )
 
 with col_right:
-    st.markdown('<div class="section-hdr">COEFFICIENTS</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-hdr">Coefficients</div>', unsafe_allow_html=True)
 
-    max_abs = max(np.abs(coefs).max(), 1e-9)
+    max_abs = max(float(np.abs(coefs).max()), 1e-9)
     for j, fname in enumerate(ds["features"]):
-        val  = float(coefs[j])
-        pct  = abs(val) / max_abs * 100
+        val     = float(coefs[j])
+        pct     = abs(val) / max_abs * 100
         is_zero = abs(val) < 1e-6
+
         val_str = (
-            f'<span class="coef-zero">≈ 0 (removed)</span>'
+            '<span class="coef-zero">≈ 0 (eliminated by LASSO)</span>'
             if is_zero else
-            f'<span style="color:{color}; font-weight:700;">{val:.4f}</span>'
+            f'<span class="coef-val" style="color:{color};">{val:+.4f}</span>'
         )
-        fill_cls = "coef-fill-neg" if val < 0 else "coef-fill-pos"
+        bar_color = color if val >= 0 else "#dc2626"
         st.markdown(f"""
         <div class="coef-item">
             <div class="coef-header">
                 <span class="coef-name">{fname}</span>{val_str}
             </div>
-            <div class="coef-track"><div class="{fill_cls}" style="width:{pct:.1f}%;"></div></div>
-        </div>
-        """, unsafe_allow_html=True)
+            <div class="coef-track">
+                <div class="coef-fill"
+                     style="width:{pct:.1f}%; background:{bar_color};"></div>
+            </div>
+        </div>""", unsafe_allow_html=True)
 
-    st.markdown('<div class="section-hdr" style="margin-top:16px;">COEFFICIENT CHART</div>',
+    st.markdown('<div class="section-hdr" style="margin-top:20px;">Coefficient chart</div>',
                 unsafe_allow_html=True)
     st.plotly_chart(
         coef_chart(coefs, ds["features"], model_name),
-        use_container_width=True, config={"displayModeBar": False},
+        use_container_width=True,
+        config={"displayModeBar": False},
     )
 
-# ── Second row: regularization path + residuals ───────────────────────────────
-st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
+# ═══════════════════════════════════════════════════════════════════════════════
+#  SECOND ROW — reg path + residuals
+# ═══════════════════════════════════════════════════════════════════════════════
+st.markdown("<div style='height:4px;'></div>", unsafe_allow_html=True)
 col_path, col_resid = st.columns(2)
 
 with col_path:
+    st.markdown('<div class="section-hdr">Regularization path</div>',
+                unsafe_allow_html=True)
     if model_name != "OLS":
-        st.markdown('<div class="section-hdr">REGULARIZATION PATH</div>',
-                    unsafe_allow_html=True)
-        path_fig = reg_path_chart(
-            X, y, ds["features"], model_name,
-            normalize, fit_intercept, alpha,
-        )
+        path_fig = reg_path_chart(X, y, ds["features"], model_name,
+                                  normalize, fit_intercept, alpha)
         if path_fig:
             st.plotly_chart(path_fig, use_container_width=True,
                             config={"displayModeBar": False})
     else:
-        st.markdown('<div class="section-hdr">ABOUT OLS</div>', unsafe_allow_html=True)
         st.markdown("""
-<div style="background:#111318; border:1px solid #232835; padding:16px; font-size:12px; line-height:1.8; color:#5a6070;">
-OLS has no hyperparameter — there is no regularization path to plot.<br><br>
-Switch to <b style="color:#00e5ff;">Ridge</b> or <b style="color:#ff6b6b;">LASSO</b>
-to see how coefficient values change across the full range of α values.<br><br>
-The regularization path shows whether features are important at all
-values of α (stable path) or only at weak regularization (shrinks quickly).
-</div>
-""", unsafe_allow_html=True)
+<div class="ols-info">
+OLS has no regularization hyperparameter — there is no path to plot.<br><br>
+Switch to <strong>Ridge</strong> or <strong>LASSO</strong> to see how coefficients
+change across the full α range.<br><br>
+A stable path means a feature is important regardless of regularization strength.
+A path that collapses quickly means the feature is weak or correlated with others.
+</div>""", unsafe_allow_html=True)
 
 with col_resid:
-    st.markdown('<div class="section-hdr">RESIDUALS vs FITTED</div>',
+    st.markdown('<div class="section-hdr">Residuals vs fitted</div>',
                 unsafe_allow_html=True)
     st.plotly_chart(
         residual_chart(y, y_hat, model_name),
-        use_container_width=True, config={"displayModeBar": False},
+        use_container_width=True,
+        config={"displayModeBar": False},
     )
 
-# ── Model comparison table ────────────────────────────────────────────────────
-st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
-st.markdown('<div class="section-hdr">SIDE-BY-SIDE MODEL COMPARISON</div>',
+# ═══════════════════════════════════════════════════════════════════════════════
+#  COMPARISON TABLE
+# ═══════════════════════════════════════════════════════════════════════════════
+st.markdown("<div style='height:4px;'></div>", unsafe_allow_html=True)
+st.markdown('<div class="section-hdr">Side-by-side model comparison</div>',
             unsafe_allow_html=True)
 
 rows = []
 for mn in ["OLS", "Ridge", "LASSO"]:
-    _, c_comp, yh_comp = fit_model(X, y, mn, alpha, normalize, fit_intercept)
-    r2_c, mse_c = metrics(y, yh_comp)
+    _, _, c_comp, yh_comp = fit_model(X, y, mn, alpha, normalize, fit_intercept)
+    r2_c, mse_c = calc_metrics(y, yh_comp)
     nz = int(np.sum(np.abs(c_comp) < 1e-6))
     rows.append({
-        "Model":       mn,
-        "R²":          round(float(r2_c), 4),
-        "MSE":         round(float(mse_c), 2),
-        "‖β‖²":        round(float(np.sum(c_comp**2)), 4),
-        "Zero coefs":  f"{nz}/{len(c_comp)}",
-        **{f: round(float(c_comp[j]), 4) for j, f in enumerate(ds["features"])},
+        "Model":      mn,
+        "R²":         round(float(r2_c), 4),
+        "MSE":        round(float(mse_c), 2),
+        "‖β‖²":       round(float(np.sum(c_comp ** 2)), 4),
+        "Zero coefs": f"{nz}/{len(c_comp)}",
+        **{f: round(float(c_comp[j]), 4)
+           for j, f in enumerate(ds["features"])},
     })
 
 df_comp = pd.DataFrame(rows).set_index("Model")
 
 def highlight_model(row):
-    styles = []
-    for col in row.index:
-        if row.name == model_name:
-            styles.append(f"background-color: {color}18; color: {color}; font-weight: bold;")
-        else:
-            styles.append("color: #5a6070;")
-    return styles
+    mc = MODEL_COLORS[row.name]
+    mbg = MODEL_BG[row.name]
+    if row.name == model_name:
+        return [f"background:{mbg}; color:{mc}; font-weight:600;"] * len(row)
+    return ["color:#94a3b8;"] * len(row)
 
 st.dataframe(
     df_comp.style.apply(highlight_model, axis=1),
     use_container_width=True,
 )
 
-st.markdown(
-    f'<div style="font-size:10px; color:#3a4050; text-align:right; margin-top:4px;">'
-    f'Comparison uses same α={alpha:.3g} for Ridge & LASSO &nbsp;·&nbsp; '
-    f'n={n_samples} &nbsp;·&nbsp; noise={noise_lvl:.1f}</div>',
-    unsafe_allow_html=True,
+st.caption(
+    f"Ridge and LASSO both use α = {alpha:.3g}  ·  "
+    f"n = {n_samples}  ·  noise = {noise_lvl:.1f}  ·  "
+    f"{'features standardized' if normalize else 'features not standardized'}"
 )
